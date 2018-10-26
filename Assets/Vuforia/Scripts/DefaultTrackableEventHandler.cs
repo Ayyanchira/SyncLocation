@@ -48,6 +48,8 @@ public class DefaultTrackableEventHandler : MonoBehaviour, ITrackableEventHandle
         {
             Debug.Log("Trackable " + mTrackableBehaviour.TrackableName + " found");
             OnTrackingFound();
+            PlayerMovementManager.lastImageTracked = mTrackableBehaviour.TrackableName;
+            PlayerMovementManager.vuforiaTargetDetected = true;
             PlaySound();
         }
         else if (previousStatus == TrackableBehaviour.Status.TRACKED &&
