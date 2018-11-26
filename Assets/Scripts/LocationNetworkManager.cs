@@ -7,13 +7,36 @@ public class LocationNetworkManager : NetworkManager
 {
 
     protected static short messageID = 777;
-    public GameObject playerObject;
+    [SerializeField] GameObject playerObject;
+    static public GameObject[] clientsRawData = new GameObject[8];
+    [SerializeField] GameObject WorldMap;
 
     public class CustomMessage : MessageBase
     {
         public string deviceType, purpose, ipAddress;
         public Vector3 devicePosition;
         public Quaternion deviceRotation;
+    }
+
+    public class ClientLocations : MessageBase
+    {
+        public Vector3 devicePosition1;
+        public Quaternion deviceRotation1;
+        public Vector3 devicePosition2;
+        public Quaternion deviceRotation2;
+        public Vector3 devicePosition3;
+        public Quaternion deviceRotation3;
+        public Vector3 devicePosition4;
+        public Quaternion deviceRotation4;
+        public Vector3 devicePosition5;
+        public Quaternion deviceRotation5;
+        public Vector3 devicePosition6;
+        public Quaternion deviceRotation6;
+        public Vector3 devicePosition7;
+        public Quaternion deviceRotation7;
+        public Vector3 devicePosition8;
+        public Quaternion deviceRotation8;
+
     }
 
 
@@ -79,6 +102,101 @@ public class LocationNetworkManager : NetworkManager
     {
         StartClient();
     }
+
+    public override void OnClientConnect(NetworkConnection conn)
+    {
+        this.client.RegisterHandler(778, OnReceivedMessage);
+    }
+
+    protected void OnReceivedMessage(NetworkMessage netMsg)
+    {
+        var msg = netMsg.ReadMessage<ClientLocations>();
+        print("Message recieved from server");
+
+        if (msg.devicePosition1 != Vector3.zero && msg.deviceRotation1 != Quaternion.identity)
+        {
+            GameObject localPlayer;
+            if (clientsRawData[0] == null)
+            {
+                localPlayer = (GameObject)Instantiate(playerObject,new GameObject().transform, true);
+                
+                clientsRawData[0] = localPlayer;
+            }
+            else
+            {
+                localPlayer = clientsRawData[0];
+            }
+
+            
+            localPlayer.transform.SetParent(WorldMap.transform,true);
+            localPlayer.transform.localPosition = msg.devicePosition1;
+            localPlayer.transform.localRotation = msg.deviceRotation1;
+            localPlayer.transform.localScale = new Vector3(0.4f, 0.8f, 0.4f);
+            clientsRawData[0] = localPlayer;
+        }
+        if (msg.devicePosition2 != Vector3.zero && msg.deviceRotation2 != Quaternion.identity)
+        {
+            print("Second player is added");
+            GameObject localPlayer;
+            if (clientsRawData[1] == null)
+            {
+                localPlayer = (GameObject)Instantiate(playerObject, new GameObject().transform, true);
+                clientsRawData[1] = localPlayer;
+            }
+            else
+            {
+                localPlayer = clientsRawData[1];
+            }
+            localPlayer.transform.position = msg.devicePosition2;
+            localPlayer.transform.rotation = msg.deviceRotation2;
+            localPlayer.transform.SetParent(WorldMap.transform, true);
+            clientsRawData[1] = localPlayer;
+        }
+        if (msg.devicePosition3 != Vector3.zero && msg.deviceRotation3 != Quaternion.identity)
+        {
+            GameObject localPlayer = clientsRawData[2];
+            localPlayer.transform.position = msg.devicePosition3;
+            localPlayer.transform.rotation = msg.deviceRotation3;
+            clientsRawData[2] = localPlayer;
+        }
+        if (msg.devicePosition4 != Vector3.zero && msg.deviceRotation4 != Quaternion.identity)
+        {
+            GameObject localPlayer = clientsRawData[3];
+            localPlayer.transform.position = msg.devicePosition4;
+            localPlayer.transform.rotation = msg.deviceRotation4;
+            clientsRawData[3] = localPlayer;
+        }
+        if (msg.devicePosition5 != Vector3.zero && msg.deviceRotation5 != Quaternion.identity)
+        {
+            GameObject localPlayer = clientsRawData[4];
+            localPlayer.transform.position = msg.devicePosition5;
+            localPlayer.transform.rotation = msg.deviceRotation5;
+            clientsRawData[4] = localPlayer;
+        }
+        if (msg.devicePosition6 != Vector3.zero && msg.deviceRotation6 != Quaternion.identity)
+        {
+            GameObject localPlayer = clientsRawData[5];
+            localPlayer.transform.position = msg.devicePosition6;
+            localPlayer.transform.rotation = msg.deviceRotation6;
+            clientsRawData[5] = localPlayer;
+        }
+        if (msg.devicePosition7 != Vector3.zero && msg.deviceRotation7 != Quaternion.identity)
+        {
+            GameObject localPlayer = clientsRawData[6];
+            localPlayer.transform.position = msg.devicePosition7;
+            localPlayer.transform.rotation = msg.deviceRotation7;
+            clientsRawData[6] = localPlayer;
+        }
+        if (msg.devicePosition8 != Vector3.zero && msg.deviceRotation8 != Quaternion.identity)
+        {
+            GameObject localPlayer = clientsRawData[7];
+            localPlayer.transform.position = msg.devicePosition8;
+            localPlayer.transform.rotation = msg.deviceRotation8;
+            clientsRawData[7] = localPlayer;
+        }
+
+        //clientsRawData = msg.clients;
+    }
 
 
 }
