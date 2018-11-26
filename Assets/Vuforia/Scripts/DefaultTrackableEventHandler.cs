@@ -46,10 +46,11 @@ public class DefaultTrackableEventHandler : MonoBehaviour, ITrackableEventHandle
             newStatus == TrackableBehaviour.Status.TRACKED ||
             newStatus == TrackableBehaviour.Status.EXTENDED_TRACKED)
         {
+            PlayerMovement.PlayerImageTarget = gameObject;
             Debug.Log("Trackable " + mTrackableBehaviour.TrackableName + " found");
+            TrackerManager.Instance.GetTracker<ObjectTracker>().Stop();
             OnTrackingFound();
-            PlayerMovementManager.lastImageTracked = mTrackableBehaviour.TrackableName;
-            PlayerMovementManager.vuforiaTargetDetected = true;
+            PlayerMovement.vuforiaTargetDetected = true;
             PlaySound();
         }
         else if (previousStatus == TrackableBehaviour.Status.TRACKED &&
