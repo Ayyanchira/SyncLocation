@@ -8,7 +8,7 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: SelfPlayer
   m_Shader: {fileID: 4800000, guid: 330cff1e184e5124abcac3b0c0a0111b, type: 3}
-  m_ShaderKeywords: _SCAN_ON
+  m_ShaderKeywords: _GLITCH_ON _SCAN_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -31,13 +31,13 @@ Material:
     - _Brightness: 3
     - _FlickerSpeed: 1
     - _Fold: 3
-    - _GlitchIntensity: 0
+    - _GlitchIntensity: 0.5
     - _GlitchSpeed: 1
     - _GlowSpeed: 1
     - _GlowTiling: 0.05
     - _RimPower: 5
     - _ScanSpeed: 0.1
-    - _ScanTiling: 9.93
+    - _ScanTiling: 10
     m_Colors:
     - _Direction: {r: 0, g: 1, b: 0, a: 0}
     - _MainColor: {r: 0.86764705, g: 0.39862484, b: 0.03827853, a: 1}

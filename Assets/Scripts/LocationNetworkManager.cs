@@ -7,7 +7,7 @@ public class LocationNetworkManager : NetworkManager
 {
 
     protected static short messageID = 777;
-    [SerializeField] GameObject playerObject;
+    public GameObject playerObject;
     static public GameObject[] clientsRawData = new GameObject[8];
     [SerializeField] GameObject WorldMap;
 
@@ -106,6 +106,7 @@ public class LocationNetworkManager : NetworkManager
     public override void OnClientConnect(NetworkConnection conn)
     {
         this.client.RegisterHandler(778, OnReceivedMessage);
+        //HideLocalPlayer();
     }
 
     protected void OnReceivedMessage(NetworkMessage netMsg)
@@ -119,7 +120,6 @@ public class LocationNetworkManager : NetworkManager
             if (clientsRawData[0] == null)
             {
                 localPlayer = (GameObject)Instantiate(playerObject,new GameObject().transform, true);
-                
                 clientsRawData[0] = localPlayer;
             }
             else
@@ -147,16 +147,28 @@ public class LocationNetworkManager : NetworkManager
             {
                 localPlayer = clientsRawData[1];
             }
-            localPlayer.transform.position = msg.devicePosition2;
-            localPlayer.transform.rotation = msg.deviceRotation2;
             localPlayer.transform.SetParent(WorldMap.transform, true);
+            localPlayer.transform.localPosition = msg.devicePosition2;
+            localPlayer.transform.localRotation = msg.deviceRotation2;
+            localPlayer.transform.localScale = new Vector3(0.4f, 0.8f, 0.4f);
             clientsRawData[1] = localPlayer;
         }
         if (msg.devicePosition3 != Vector3.zero && msg.deviceRotation3 != Quaternion.identity)
         {
-            GameObject localPlayer = clientsRawData[2];
-            localPlayer.transform.position = msg.devicePosition3;
-            localPlayer.transform.rotation = msg.deviceRotation3;
+            GameObject localPlayer;
+            if (clientsRawData[2] == null)
+            {
+                localPlayer = (GameObject)Instantiate(playerObject, new GameObject().transform, true);
+                clientsRawData[2] = localPlayer;
+            }
+            else
+            {
+                localPlayer = clientsRawData[2];
+            }
+            localPlayer.transform.SetParent(WorldMap.transform, true);
+            localPlayer.transform.localPosition = msg.devicePosition3;
+            localPlayer.transform.localRotation = msg.deviceRotation3;
+            localPlayer.transform.localScale = new Vector3(0.4f, 0.8f, 0.4f);
             clientsRawData[2] = localPlayer;
         }
         if (msg.devicePosition4 != Vector3.zero && msg.deviceRotation4 != Quaternion.identity)
@@ -198,5 +210,12 @@ public class LocationNetworkManager : NetworkManager
         //clientsRawData = msg.clients;
     }
 
+    private void HideLocalPlayer()
+    {
+        if (playerObject.GetComponent<Renderer>().enabled == true)
+        {
+            playerObject.GetComponent<Renderer>().enabled = false;
+        }
+    }
 
 }
