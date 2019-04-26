@@ -8,6 +8,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Main.unity
     guid: acfdd19557cc25548ab20bbe56cfa77b
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/TagAlongForMap.unity
     guid: 7d8def8b3544647409dbf7fe8762f4aa
+  - enabled: 0
+    path: Assets/Scenes/Version2.unity
+    guid: fb4506806c0ff1041839629c5ab605a5
+  - enabled: 0
+    path: Assets/Scenes/Version3.unity
+    guid: 6d477c896ab04194183122385a59783d
+  - enabled: 0
+    path: Assets/Scenes/Version4.unity
+    guid: f944b554e94200141bf5b6fa11bf9f06
+  - enabled: 1
+    path: Assets/Scenes/Version5.unity
+    guid: d669312d89866ae4099092186b90afd0

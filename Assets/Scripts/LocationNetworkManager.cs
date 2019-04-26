@@ -8,8 +8,13 @@ public class LocationNetworkManager : NetworkManager
 
     protected static short messageID = 777;
     public GameObject playerObject;
-    static public GameObject[] clientsRawData = new GameObject[8];
+    static public GameObject[] clientsRawData = new GameObject[MaxClients];
     [SerializeField] GameObject WorldMap;
+    const int MaxClients = 10;
+    BuildingFloors defaultBuildingLocation = new BuildingFloors();
+    [SerializeField] public GameObject Building, FirstFloor, SecondFloor, ThirdFloor, FourthFloor;
+
+
 
     public class CustomMessage : MessageBase
     {
@@ -39,11 +44,22 @@ public class LocationNetworkManager : NetworkManager
 
     }
 
+    public class ClientCoordinates : MessageBase
+    {
+        public Vector3[] positions;
+        public Quaternion[] rotations;
+        public int numberOfClients;
+
+    }
+
 
     // Use this for initialization
     void Start()
     {
-
+        defaultBuildingLocation.firstFloorLocation = FirstFloor.transform.position;
+        defaultBuildingLocation.secondFloorLocation = SecondFloor.transform.position;
+        defaultBuildingLocation.thirdFloorLocation = ThirdFloor.transform.position;
+        defaultBuildingLocation.fourthFloorLocation = FourthFloor.transform.position;
     }
 
     // Update is called once per frame
@@ -80,8 +96,24 @@ public class LocationNetworkManager : NetworkManager
         //#endif
 
         msg.ipAddress = this.networkAddress;
-        client.Send(messageID, msg);
+        //client.Send(messageID, msg);
+        updateLocationToServer(msg);
     }
+
+
+    [SerializeField] float updateFrequency = 0.2f;
+    float nextUpdate = 0.0f;
+    private void updateLocationToServer(CustomMessage msg)
+    {
+        if (Time.time >= nextUpdate)
+        {
+            nextUpdate = Time.time + updateFrequency;
+            client.Send(messageID, msg);
+        }
+
+    }
+
+
 
     //#if !UNITY_EDITOR
     //    public static string GetLocalIPAddress()
@@ -105,7 +137,8 @@ public class LocationNetworkManager : NetworkManager
 
     public override void OnClientConnect(NetworkConnection conn)
     {
-        this.client.RegisterHandler(778, OnReceivedMessage);
+        //this.client.RegisterHandler(778, OnReceivedMessage);
+        this.client.RegisterHandler(800, OnReceivedCoordinates);
         //HideLocalPlayer();
     }
 
@@ -210,6 +243,54 @@ public class LocationNetworkManager : NetworkManager
         //clientsRawData = msg.clients;
     }
 
+    protected void OnReceivedCoordinates(NetworkMessage netMsg)
+    {
+        print("Received location updates from server");
+        var msg = netMsg.ReadMessage<ClientCoordinates>();
+
+        //Scan through the client coordinate response one by one and check if there are any updates. If so update the list of clients on the client side.
+        for (int i = 0; i < MaxClients; i++)
+        {
+            Vector3 playerPosition = msg.positions[i];
+            Quaternion playerRotation = msg.rotations[i];
+
+            if (playerPosition != Vector3.zero && playerRotation != Quaternion.identity)
+            {
+                GameObject localPlayer;
+                if (clientsRawData[i] == null)
+                {
+                    localPlayer = (GameObject)Instantiate(playerObject, new GameObject().transform, true);
+                    clientsRawData[0] = localPlayer;
+                }
+                else
+                {
+                    localPlayer = clientsRawData[0];
+                }
+
+                clientsRawData[i] = localPlayer;
+
+                //Determine the floor
+                FloorLevel floor = DetermineFloor(playerPosition);
+
+
+                //Select floor model as a parent
+                GameObject parent = Building;
+                parent = SelectParent(floor);
+
+                //Get position based on floor's location in the world
+                Vector3 floorOffset = GetFloorOffsetForFloor(floor);
+
+                Vector3 localizedPosition = playerPosition - floorOffset;
+                localPlayer.transform.SetParent(parent.transform, false);
+
+                localPlayer.transform.localPosition = playerPosition;
+                localPlayer.transform.localRotation = playerRotation;
+                localPlayer.transform.localScale = new Vector3(0.4f, 0.8f, 0.4f);
+                
+            }
+        }
+    }
+
     private void HideLocalPlayer()
     {
         if (playerObject.GetComponent<Renderer>().enabled == true)
@@ -217,5 +298,95 @@ public class LocationNetworkManager : NetworkManager
             playerObject.GetComponent<Renderer>().enabled = false;
         }
     }
+
+    private Vector3 GetFloorOffsetForFloor(FloorLevel floorLevel)
+    {
+        Vector3 offset = Vector3.zero;
+        switch (floorLevel)
+        {
+            case FloorLevel.first:
+                offset = defaultBuildingLocation.firstFloorLocation;
+                break;
+            case FloorLevel.second:
+                offset = defaultBuildingLocation.secondFloorLocation;
+                break;
+            case FloorLevel.third:
+                offset = defaultBuildingLocation.thirdFloorLocation;
+                break;
+            case FloorLevel.fourth:
+                offset = defaultBuildingLocation.fourthFloorLocation;
+                break;
+            case FloorLevel.unknown:
+                break;
+        }
+
+        return offset;
+    }
+
+    //TODO: THe function to get floor value is getting redundant in many classes. Try to optimize it.
+    private GameObject SelectParent(FloorLevel floor)
+    {
+        GameObject parent;
+        switch (floor)
+        {
+            case FloorLevel.first:
+                {
+                    parent = FirstFloor;
+                    break;
+                }
+
+            case FloorLevel.second:
+                {
+                    parent = SecondFloor;
+                    break;
+                }
+
+            case FloorLevel.third:
+                {
+                    parent = ThirdFloor;
+                    break;
+                }
+
+            case FloorLevel.fourth:
+                {
+                    parent = FourthFloor;
+                    break;
+                }
+
+            case FloorLevel.unknown:
+                {
+                    parent = Building;
+                    break;
+                }
+
+            default:
+                {
+                    parent = Building;
+                    print("Going in default case...");
+                    break;
+                }
+        }
+
+        return parent;
+    }
+
+    private FloorLevel DetermineFloor(Vector3 playerPosition)
+    {
+        //TODO: Determine the floor based on y axis.
+        FloorLevel floor = FloorLevel.unknown;
+        // +2 ... -1 -> Fourth Floor
+        // -1... -4 -> Third Floor
+        // -4 ... -8 -> Second floor
+        // -8 ... -15 > First Floor
+        var yPosition = playerPosition.y;
+        if (yPosition > -1 && yPosition <= 4) { floor = FloorLevel.fourth; }
+        else if (yPosition > -4 && yPosition <= -1) { floor = FloorLevel.third; }
+        else if (yPosition > -8 && yPosition <= -4) { floor = FloorLevel.second; }
+        else if (yPosition > -15 && yPosition <= -8) { floor = FloorLevel.first; }
+        else { floor = FloorLevel.unknown; }
+        return floor;
+    }
+
+
 
 }

@@ -1,5 +1,11 @@
 ﻿using UnityEngine;
 
+
+public enum FloorLevel
+{
+    first, second, third, fourth, unknown
+}
+
 public class PlayerMovement : MonoBehaviour
 {
     //ServerImage Target is place which is universal. Each client and server will have server image location targets. 
@@ -20,7 +26,7 @@ public class PlayerMovement : MonoBehaviour
     //TODO: Seems like it compensates the initial rotation that image target introduces. Need more analysis.
     private readonly Quaternion xAxisRot = Quaternion.AngleAxis(90, Vector3.right);
 
-    // Use this for initialization
+    // Use this for initialization\
     void Start()
     {
 
@@ -76,6 +82,7 @@ public class PlayerMovement : MonoBehaviour
 
         //Positioning the player
         var pos = MatrixUtils.ExtractTranslationFromMatrix(ref m);
+        pos.y = -pos.y;
         //Setting the virtual player as a child of Image Target (for server)
         virtualPlayer.transform.SetParent(ServerImageTarget.transform, false);
         //Assigning local position to virtual player with rewspect to Image Target
@@ -99,5 +106,22 @@ public class PlayerMovement : MonoBehaviour
         var flatAngle = Quaternion.Inverse(targQuat) * camQuat;
         virtualPlayer.transform.localRotation = flatAngle;
 
+    }
+
+    static public FloorLevel getFloorLevel(GameObject playerRawCoordinates)
+    {
+        var yPosition = playerRawCoordinates.transform.position.y;
+        //TODO: Determine the floor based on y axis.
+        FloorLevel floor = FloorLevel.unknown;
+        // +2 ... -1 -> Fourth Floor
+        // -1... -4 -> Third Floor
+        // -4 ... -8 -> Second floor
+        // -8 ... -15 > First Floor
+        if (yPosition > -1 && yPosition <= 4) { floor = FloorLevel.fourth; }
+        else if (yPosition > -4 && yPosition <= -1) { floor = FloorLevel.third; }
+        else if (yPosition > -8 && yPosition <= -4) { floor = FloorLevel.second; }
+        else if (yPosition > -15 && yPosition <= -8) { floor = FloorLevel.first; }
+        else { floor = FloorLevel.unknown; }
+        return floor;
     }
 }

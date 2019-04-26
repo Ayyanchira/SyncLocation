@@ -52,6 +52,9 @@ public class DefaultTrackableEventHandler : MonoBehaviour, ITrackableEventHandle
             OnTrackingFound();
             PlayerMovement.vuforiaTargetDetected = true;
             PlaySound();
+            //
+            //Disable
+            GameObject.Find("ARCamera").GetComponent<VuforiaBehaviour>().enabled = false;
         }
         else if (previousStatus == TrackableBehaviour.Status.TRACKED &&
                  newStatus == TrackableBehaviour.Status.NOT_FOUND)
