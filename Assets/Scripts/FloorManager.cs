@@ -21,7 +21,7 @@ public class FloorManager : MonoBehaviour {
     [SerializeField] Material transparentMaterial;
     [SerializeField] bool isInFront = false;
     [SerializeField] GameObject headPosition;
-
+    bool isIsometricView = false;
     [SerializeField] GameObject RotatingObject;
 
     Renderer Renderer1, Renderer2, Renderer3, Renderer4;
@@ -54,7 +54,11 @@ public class FloorManager : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        TakeSphereRotation();
+        if (!isIsometricView)
+        {
+            TakeSphereRotation();
+        }
+        
     }
 
     private void TakeSphereRotation()
@@ -156,6 +160,55 @@ public class FloorManager : MonoBehaviour {
         fourthfloor.transform.localPosition = Vector3.Lerp(fourthfloor.transform.localPosition, newLocation, 2f);
         //fourthfloor.transform.localPosition = new Vector3(0, fourthfloor.transform.localPosition.y, fourthfloor.transform.localPosition.z);
     }
+
+    public void showStairCase()
+    {
+        isIsometricView = false;
+        fourthfloor.transform.localPosition = new Vector3(0, 0.3f, 0.6f);
+        thirdfloor.transform.localPosition = new Vector3(0, 0.2f, 0.3f);
+        secondfloor.transform.localPosition = new Vector3(0, 0.1f, 0);
+        firstfloor.transform.localPosition = new Vector3(0, 0f, -0.3f);
+
+        fourthfloor.transform.localRotation = Quaternion.identity;
+        thirdfloor.transform.localRotation = Quaternion.identity;
+        secondfloor.transform.localRotation = Quaternion.identity;
+        firstfloor.transform.localRotation = Quaternion.identity;
+
+    }
+
+    public void showIsometric()
+    {
+        isIsometricView = true;
+        fourthfloor.transform.localPosition = new Vector3(0, 0.3f, 0);
+        thirdfloor.transform.localPosition = new Vector3(0, 0.2f, 0);
+        secondfloor.transform.localPosition = new Vector3(0, 0.1f, 0);
+        firstfloor.transform.localPosition = new Vector3(0, 0.0f, 0);
+
+        fourthfloor.transform.localRotation = Quaternion.identity;
+        thirdfloor.transform.localRotation = Quaternion.identity;
+        secondfloor.transform.localRotation = Quaternion.identity;
+        firstfloor.transform.localRotation = Quaternion.identity;
+    }
+
+    public void showOrthogonal()
+    {
+        isIsometricView = false;
+        fourthfloor.transform.localPosition = new Vector3(0, 0, 0);
+        thirdfloor.transform.localPosition = new Vector3(1, 0, 0);
+        secondfloor.transform.localPosition = new Vector3(2, 0, 0);
+        firstfloor.transform.localPosition = new Vector3(3, 0, 0);
+
+        //TODO: Rotate the y and z to 90 90. It should work. Dont know why its not rotating!
+        fourthfloor.transform.localRotation = new Quaternion(0, 123, 120, 2);
+        //fourthfloor.transform.localEulerAngles.Set(0, 90f, 90f);
+        thirdfloor.transform.localEulerAngles.Set(0, 90f, 90f);
+        secondfloor.transform.localEulerAngles.Set(0, 90f, 90f);
+        firstfloor.transform.localEulerAngles.Set(0, 90f, 90f);
+
+        print("The rotation is : "+firstfloor.transform.localRotation.y);
+    }
+
+
 }
 
 public class BuildingFloors
